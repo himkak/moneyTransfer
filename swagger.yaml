@@ -1,0 +1,107 @@
+swagger: "2.0"
+info:
+  description: "This is a sample server Petstore server.  You can find out more about     Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).      For this sample, you can use the api key `special-key` to test the authorization     filters."
+  version: "1.0.0"
+  title: "Swagger sendMoney use case"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "apiteam@swagger.io"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "account.swagger.io"
+basePath: "/v1"
+tags:
+- name: "accounts"
+  description: "Account resource"
+  externalDocs:
+    description: "Find out more"
+    url: "http://swagger.io"
+
+schemes:
+- "http"
+paths:
+  /accounts:
+    post:
+      tags:
+      - "accounts"
+      summary: "Add a new account into DB"
+      description: ""
+      operationId: "createAccount"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Account details that is needed to be added to the DB"
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+      responses:
+        201:
+          description: "Created"
+        405:
+          description: "Invalid input"
+  /accounts/transfer:
+   put:
+      tags:
+      - "accounts"
+      summary: "To transfer money from sender to receiver"
+      description: "To transfer money from sender to receiver"
+      operationId: "transferMoney"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Account details that is needed to be added to the DB"
+        required: true
+        schema:
+          $ref: "#/definitions/Transfer"
+      responses:
+       200:
+         description: OK
+   
+    
+
+
+definitions:
+  User:
+    type: "object"
+    properties:
+      userName:
+        type: string
+        
+      userId:
+        type: "integer" 
+  Transfer:
+    type: "object"
+    properties:
+      fromAccount:
+        type: "integer"
+        format: "int64"
+      toAccount:
+        type: "integer"
+        format: "int64"
+      amount:
+        type: "integer"
+        format: "int32"
+
+
+  FailureResponse:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+        format: "int32"
+      type:
+        type: "string"
+      message:
+        type: "string"
+externalDocs:
+  description: "Find out more about Swagger"
+  url: "http://swagger.io"
