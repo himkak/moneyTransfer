@@ -30,12 +30,17 @@ Please put your work on github or bitbucket.
 Detail out the comparison
 1. Http server Framework : Should be able to run without installing any server. LightWeight, 
    supports Rest, run as jar, high performance, concurrency
-     Restlet : 
-     RestEay
-     Jersey
-     Apache CXF
-     Dropwizard : A heavy framework. Lot of plumbing reqd even to build tiny service
-     javalin : 
+     Restlet : Lightweight.  Supports major web standards. Many extensions also available to integrate like jackson, . Suitable for both server and client applications.
+     RestEay  
+     Jersey v2: A lightweight framework.  It is an implementation of the jax-rs standard, 
+        and many other frameworks can natively understand the jax-rs annotations. Open source. 
+     
+     Apache CXF  
+     Dropwizard : A heavy framework. Lot of plumbing reqd even to build tiny service. Uses Jetty server
+     javalin :   
+     vertx : Uses Jetty server
+     spark  : 
+            Uses Jetty server
 
     Comparison on points :
         server being used
