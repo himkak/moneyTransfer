@@ -1,5 +1,7 @@
 package com.revolut.test;
 
+import java.util.List;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -32,11 +34,21 @@ public class AccountRepository {
 	}
 
 	public void createAccount(UserDetails userDetails) {
+		try {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		session.save(userDetails);
 		transaction.commit();
+		session.close();
+		}catch(Exception exc) {
+			exc.printStackTrace();
+		}
 
+	}
+
+	public List<UserDetails> getAllUsers() {
+		Session session = sessionFactory.openSession();
+		return session.createQuery("from UserDetails",UserDetails.class).list();
 	}
 
 }

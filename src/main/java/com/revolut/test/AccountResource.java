@@ -1,6 +1,9 @@
 package com.revolut.test;
 
+import java.util.List;
+
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -20,9 +23,9 @@ public class AccountResource extends ServerResource {
 
 	@POST
 	public String createAccount(UserDetails userDetails) {
-		
+		System.out.println("Request received to create account");
 		accountService.createAccount(userDetails);
-
+		System.out.println("Account created");
 		return "Account created";
 	}
 
@@ -30,5 +33,10 @@ public class AccountResource extends ServerResource {
 	@Path("/transfer")
 	public void sendMoney() {
 		System.out.println("server delete method called.");
+	}
+	
+	@GET
+	public List<UserDetails> getAllUsers(){
+		return accountService.getAllUsers();
 	}
 }

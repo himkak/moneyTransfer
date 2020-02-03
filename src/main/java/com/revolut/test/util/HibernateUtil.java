@@ -1,10 +1,7 @@
 package com.revolut.test.util;
 
 import org.hibernate.SessionFactory;
-import org.hibernate.boot.Metadata;
-import org.hibernate.boot.MetadataSources;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
 
 /**
  * The Class HibernateUtil is used to create the connection with the database
@@ -12,40 +9,26 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
  * 
  */
 public final class HibernateUtil {
+
+	private static SessionFactory sessionFactory;
 	
-	private static StandardServiceRegistry registry;
-    private static SessionFactory sessionFactory;
+	static {
+		getSessionFactory();
+	}
 
-    public static SessionFactory getSessionFactory() {
-        if (sessionFactory == null) {
-            try {
-                // Create registry
-                registry = new StandardServiceRegistryBuilder().configure().build();
+	public static SessionFactory getSessionFactory() {
+		if (sessionFactory == null) {
+			try {
+				sessionFactory = new Configuration().configure().buildSessionFactory();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return sessionFactory;
+	}
 
-                // Create MetadataSources
-                MetadataSources sources = new MetadataSources(registry);
+	public static void shutdown() {
+		sessionFactory.close();
+	}
 
-                // Create Metadata
-                Metadata metadata = sources.getMetadataBuilder().build();
-
-                // Create SessionFactory
-                sessionFactory = metadata.getSessionFactoryBuilder().build();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                if (registry != null) {
-                    StandardServiceRegistryBuilder.destroy(registry);
-                }
-            }
-        }
-        return sessionFactory;
-    }
-
-    public static void shutdown() {
-        if (registry != null) {
-            StandardServiceRegistryBuilder.destroy(registry);
-        }
-    }
-	
-	
 }

@@ -70,6 +70,8 @@ Detail out the comparison
    NoSql : Horizontally scalable. Less complex. Schemaless.
     Redis (embedded) can be used as in memory
 
+5. ORM Framework : Hibernate
+
 As the structure of the data is relational and we are looking for ACID behavior, so preferring 
     relational H2 in-memory DB.
    
