@@ -11,10 +11,6 @@ import org.hibernate.cfg.Configuration;
 public final class HibernateUtil {
 
 	private static SessionFactory sessionFactory;
-	
-	static {
-		getSessionFactory();
-	}
 
 	public static SessionFactory getSessionFactory() {
 		if (sessionFactory == null) {
