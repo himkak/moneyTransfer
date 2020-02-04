@@ -1,7 +1,4 @@
-package com.revolut;
-
-import java.util.List;
-import java.util.Optional;
+package com.revolut.repository;
 
 import javax.persistence.RollbackException;
 
@@ -14,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.revolut.entity.Account;
 import com.revolut.entity.UserDetails;
+import com.revolut.service.AccountService;
 import com.revolut.util.HibernateUtil;
 
 public class AccountRepository {
@@ -37,7 +35,7 @@ public class AccountRepository {
 		return instance;
 	}
 
-	public void saveUserDetails(UserDetails userDetails) {
+	public void saveUserAndAccountDetails(UserDetails userDetails) {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		session.save(userDetails);
@@ -46,21 +44,7 @@ public class AccountRepository {
 
 	}
 
-	public List<UserDetails> getAllUsers() {
-		Session session = sessionFactory.openSession();
-		List<UserDetails> usersDetails = session.createQuery("from UserDetails", UserDetails.class).list();
-		session.close();
-		return usersDetails;
-	}
-
-	public Optional<UserDetails> getUser(String userName) {
-		Session session = sessionFactory.openSession();
-		Query<UserDetails> query = session.createQuery("from UserDetails ud where ud.userName=:userName",
-				UserDetails.class);
-		query.setParameter("userName", userName);
-		UserDetails userDet = query.setMaxResults(1).uniqueResult();
-		return Optional.ofNullable(userDet);
-	}
+	
 
 	public void saveAccount(Account account) {
 		Session session = sessionFactory.openSession();
