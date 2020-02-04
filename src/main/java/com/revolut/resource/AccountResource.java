@@ -41,8 +41,8 @@ public class AccountResource extends ServerResource {
 
 	@PUT
 	@Path("/money")
-	public void addMoney(AddMoneyRequest req) {
-		accountService.addMoney(req);
+	public boolean addMoney(AddMoneyRequest req) {
+		return accountService.addMoney(req);
 	}
 
 }

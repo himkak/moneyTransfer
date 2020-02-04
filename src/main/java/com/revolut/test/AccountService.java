@@ -95,8 +95,8 @@ public class AccountService {
 				.collect(Collectors.toSet());
 	}
 
-	public void addMoney(AddMoneyRequest req) {
-		accountRepo.addMoney(req.getAmt(), req.getAccountId());
+	public boolean addMoney(AddMoneyRequest req) {
+		return accountRepo.addMoney(req.getAmt(), req.getAccountId());
 
 	}
 
