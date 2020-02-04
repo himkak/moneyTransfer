@@ -1,4 +1,4 @@
-package com.revolut.test.model;
+package com.revolut.test.entity;
 
 public enum AccountState {
 

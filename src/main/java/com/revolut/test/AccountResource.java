@@ -10,34 +10,53 @@ import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.Put;
 import org.restlet.resource.ServerResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.revolut.test.model.UserDetails;
+import com.revolut.test.model.AccountResponse;
+import com.revolut.test.model.AddMoneyRequest;
+import com.revolut.test.model.CreateAccountRequest;
+import com.revolut.test.model.SendMoneyRequest;
+import com.revolut.test.model.UserAccountsInfo;
 
 @Path("/accounts/v1")
-//@Produces(MediaType.APPLICATION_JSON)
-
+@Consumes(MediaType.APPLICATION_JSON)
 public class AccountResource extends ServerResource {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(AccountResource.class);
 	private final AccountService accountService = AccountService.getInstance();
 
-	@Post
-	@Consumes(MediaType.APPLICATION_JSON)
-	public String createAccount(UserDetails userDetails) {
-		// UserDetails userDetails=new UserDetails();
-		System.out.println("Request received to create account");
-		accountService.createAccount(userDetails);
-		System.out.println("Account created");
-		return "Account created";
-	}
 
-	@Put
-	@Path("/transfer")
-	public void sendMoney() {
-		System.out.println("server delete method called.");
-	}
-
+	//TODO remove
 	@Get
-	public List<UserDetails> getAllUsers() {
+	@Path("/user")
+	public List<UserAccountsInfo> getAllUsers() {
 		return accountService.getAllUsers();
 	}
+	
+	@Post
+	public AccountResponse createAccount(CreateAccountRequest userDetails) {
+		LOGGER.info("Request received to create account");
+		int accNum = accountService.createAccount(userDetails);
+		LOGGER.debug("Account created " + accNum);
+		return new AccountResponse(accNum);
+	}
+
+	/*
+	 * @Put
+	 * 
+	 * @Path("/transfer") public int sendMoney(SendMoneyRequest request) { return
+	 * accountService.sendMoney(request); }
+	 */
+
+
+	
+	@Put
+	@Path("/money")
+	public void addMoney(AddMoneyRequest req) {
+		accountService.addMoney(req);
+		
+	}
+	
+
 }
