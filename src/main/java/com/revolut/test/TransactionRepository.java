@@ -5,8 +5,6 @@ import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.revolut.test.entity.TransactionHistory;
 import com.revolut.test.entity.TransactionState;
@@ -14,7 +12,7 @@ import com.revolut.test.util.HibernateUtil;
 
 public class TransactionRepository {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(TransactionRepository.class);
+	//private static final Logger LOGGER = LoggerFactory.getLogger(TransactionRepository.class);
 	private static TransactionRepository instance = null;
 
 	private SessionFactory sessionFactory = HibernateUtil.getSessionFactory();

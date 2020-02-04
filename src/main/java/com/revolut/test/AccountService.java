@@ -102,28 +102,83 @@ public class AccountService {
 
 	public int sendMoney(SendMoneyRequest request) {
 		int requestId = getRandomNumber();
+		
+		checkAccounts(request);
+		checkBalance(request);
+		
 		TransactionHistory transHist = new TransactionHistory(request.getFromAccountNumber(),
 				request.getToAccountNumber(), request.getAmount(), requestId);
 		transactionRepo.saveTransaction(transHist);
 		MDC.put("requestId", Integer.toString(requestId));
-		boolean isEarmarkSuccess = accountRepo.earMarkAccount(request.getFromAccountNumber(), request.getAmount());
-		transactionRepo.saveTransactionState(new TransactionState(0, TransactionStatus.EARMARKED, transHist));
+		boolean isEarmarkSuccess = earMarkReceiverAccount(request, transHist);
 		if (isEarmarkSuccess) {
-			boolean isAmtReceived = accountRepo.addMoney(request.getAmount(), request.getToAccountNumber());
-			transactionRepo.saveTransactionState(new TransactionState(0, TransactionStatus.TRANSFERRED, transHist));
+			boolean isAmtReceived = transferToReceiverAccount(request, transHist);
 			if (isAmtReceived) {
-				accountRepo.reduceEarMarkedAmount(request.getFromAccountNumber(), request.getAmount());
-				transactionRepo.saveTransactionState(
-						new TransactionState(0, TransactionStatus.RECEIVER_EARMARKUPDATED, transHist));
-				LOGGER.info("Transaction successful");
-				transactionRepo.saveTransactionState(new TransactionState(0, TransactionStatus.SUCCESS, transHist));
+				updateReceiverEarmark(request, transHist);
+				transactionSuccess(transHist);
 			} else {
-				accountRepo.rollbackEarmarkedAmount(request.getFromAccountNumber(), request.getAmount());
-				transactionRepo.saveTransactionState(new TransactionState(0, TransactionStatus.ROLLEDBACK, transHist));
+				rollback(request, transHist);
 			}
 		}
 
 		return requestId;
+	}
+
+	private void checkBalance(SendMoneyRequest request) {
+		boolean isSufficientAmtExists=accountRepo.isSufficientBalanceExists(request.getFromAccountNumber(), request.getAmount());
+		if(!isSufficientAmtExists) {
+			throw new RuntimeException("Insufficient balance in sender's account.");
+		}
+	}
+
+	private void checkAccounts(SendMoneyRequest request) {
+		boolean isFromAccExists=accountRepo.checkAccountExists(request.getFromAccountNumber());
+		if(!isFromAccExists) {
+			throw new RuntimeException("Sender account doesnt exists.");
+		}
+		boolean isToAccountExists=accountRepo.checkAccountExists(request.getToAccountNumber());
+		if(!isToAccountExists) {
+			throw new RuntimeException("Receiver account doesnt exists.");
+		}
+	}
+
+	private void rollback(SendMoneyRequest request, TransactionHistory transHist) {
+		TransactionState rolledBack = new TransactionState(0, TransactionStatus.ROLLEDBACK, transHist);
+		accountRepo.rollbackEarmarkedAmount(request.getFromAccountNumber(), request.getAmount());
+		transactionRepo.saveTransactionState(rolledBack);
+		transHist.getTransStates().add(rolledBack);
+	}
+
+	private void transactionSuccess(TransactionHistory transHist) {
+		TransactionState success = new TransactionState(0, TransactionStatus.SUCCESS, transHist);
+		LOGGER.info("Transaction successful");
+		transactionRepo.saveTransactionState(success);
+		transHist.getTransStates().add(success);
+	}
+
+	private void updateReceiverEarmark(SendMoneyRequest request, TransactionHistory transHist) {
+		accountRepo.reduceEarMarkedAmount(request.getFromAccountNumber(), request.getAmount());
+		TransactionState receiverEarMarkUpdated = new TransactionState(0, TransactionStatus.RECEIVER_EARMARKUPDATED,
+				transHist);
+		transactionRepo.saveTransactionState(receiverEarMarkUpdated);
+		transHist.getTransStates().add(receiverEarMarkUpdated);
+	}
+
+	private boolean transferToReceiverAccount(SendMoneyRequest request, TransactionHistory transHist) {
+		boolean isAmtReceived = accountRepo.addMoney(request.getAmount(), request.getToAccountNumber());
+		TransactionState transferred = new TransactionState(0, TransactionStatus.TRANSFERRED, transHist);
+		transactionRepo.saveTransactionState(transferred);
+		transHist.getTransStates().add(transferred);
+		return isAmtReceived;
+	}
+
+	private boolean earMarkReceiverAccount(SendMoneyRequest request, TransactionHistory transHist) {
+		boolean isEarmarkSuccess = accountRepo.earMarkAccount(request.getFromAccountNumber(), request.getAmount());
+		TransactionState earmarked = new TransactionState(0, TransactionStatus.EARMARKED, transHist);
+		transHist.setTransStates(new HashSet<>());
+		transHist.getTransStates().add(earmarked);
+		transactionRepo.saveTransactionState(earmarked);
+		return isEarmarkSuccess;
 	}
 
 	public List<TransactionHistoryResponse> getAllTransactions() {
@@ -136,7 +191,7 @@ public class AccountService {
 	}
 
 	private List<String> getStates(TransactionHistory txn) {
-		return txn.getTransStates().stream().map(state->state.getStatus().toString()).collect(Collectors.toList());
+		return txn.getTransStates().stream().map(state -> state.getStatus().toString()).collect(Collectors.toList());
 	}
 
 }

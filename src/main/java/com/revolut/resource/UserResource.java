@@ -1,4 +1,4 @@
-package com.revolut.test;
+package com.revolut.resource;
 
 import java.util.List;
 
@@ -10,6 +10,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.restlet.resource.ServerResource;
 
+import com.revolut.test.AccountService;
 import com.revolut.test.model.UserAccountsInfo;
 
 @Path("/users/v1")

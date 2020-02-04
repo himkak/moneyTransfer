@@ -5,9 +5,9 @@ import java.util.Set;
 
 import javax.ws.rs.core.Application;
 
-import com.revolut.test.AccountResource;
-import com.revolut.test.TransactionResource;
-import com.revolut.test.UserResource;
+import com.revolut.resource.AccountResource;
+import com.revolut.resource.TransactionResource;
+import com.revolut.resource.UserResource;
 
 public class SendMoneySubApplication extends Application {
 

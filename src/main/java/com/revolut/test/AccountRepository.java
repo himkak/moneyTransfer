@@ -49,6 +49,7 @@ public class AccountRepository {
 	public List<UserDetails> getAllUsers() {
 		Session session = sessionFactory.openSession();
 		List<UserDetails> usersDetails = session.createQuery("from UserDetails", UserDetails.class).list();
+		session.close();
 		return usersDetails;
 	}
 
@@ -145,6 +146,28 @@ public class AccountRepository {
 		session.close();
 		return true;
 
+	}
+
+	public boolean checkAccountExists(int accountId) {
+		Session session = sessionFactory.openSession();
+		Query<Account> query = session.createQuery("from Account  where accountNum=:accNum", Account.class);
+		query.setParameter("accNum", accountId);
+		Account account = query.setMaxResults(1).uniqueResult();
+		if(account!=null) {
+			return true;
+		}
+		return false;
+	}
+
+	public boolean isSufficientBalanceExists(int accountId, int amount) {
+		Session session = sessionFactory.openSession();
+		Query<Account> query = session.createQuery("from Account  where accountNum=:accNum", Account.class);
+		query.setParameter("accNum", accountId);
+		Account account = query.setMaxResults(1).uniqueResult();
+		if(account.getBalance()<amount) {
+			return false;
+		}
+		return true;
 	}
 
 }

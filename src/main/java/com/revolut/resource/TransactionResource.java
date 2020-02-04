@@ -1,4 +1,4 @@
-package com.revolut.test;
+package com.revolut.resource;
 
 import java.util.List;
 
@@ -12,6 +12,7 @@ import org.restlet.resource.ServerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.revolut.test.AccountService;
 import com.revolut.test.model.TransactionHistoryResponse;
 
 @Path("/transactions/v1")
@@ -24,6 +25,7 @@ public class TransactionResource extends ServerResource {
 	
 	@GET
 	public List<TransactionHistoryResponse> getAllTransactions() {
+		LOGGER.debug("Request received to get all users accounts");
 		return accountService.getAllTransactions();
 	}
 

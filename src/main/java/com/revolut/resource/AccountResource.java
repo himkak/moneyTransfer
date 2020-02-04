@@ -1,4 +1,4 @@
-package com.revolut.test;
+package com.revolut.resource;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -11,6 +11,7 @@ import org.restlet.resource.ServerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.revolut.test.AccountService;
 import com.revolut.test.model.AccountResponse;
 import com.revolut.test.model.AddMoneyRequest;
 import com.revolut.test.model.CreateAccountRequest;

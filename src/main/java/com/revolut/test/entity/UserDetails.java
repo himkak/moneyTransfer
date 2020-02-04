@@ -35,14 +35,13 @@ public class UserDetails {
 	@Column(name = "USER_NAME", unique = true)
 	private String userName;
 
-	@OneToMany(mappedBy="userDetails", cascade=CascadeType.ALL, fetch=FetchType.LAZY)
+	@OneToMany(mappedBy="userDetails", cascade=CascadeType.ALL, fetch=FetchType.EAGER)
 	private Set<Account> userAccounts;
 
 	@Override
 	public String toString() {
-		return "UserDetails [userIdentificationNumber=" + userIdentificationNumber + ", userName=";
+		return "UserDetails [userIdentificationNumber=" + userIdentificationNumber + ", userName=" + userName + "]";
 	}
 
-	
 	
 }
