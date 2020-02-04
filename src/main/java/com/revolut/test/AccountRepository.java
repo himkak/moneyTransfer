@@ -3,18 +3,22 @@ package com.revolut.test;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.RollbackException;
+
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.revolut.test.entity.Account;
 import com.revolut.test.entity.UserDetails;
 import com.revolut.test.util.HibernateUtil;
 
 public class AccountRepository {
-
-	private static AccountRepository instance = new AccountRepository();
+	private static final Logger LOGGER = LoggerFactory.getLogger(AccountService.class);
+	private static AccountRepository instance = null;
 
 	private SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
 
@@ -24,15 +28,12 @@ public class AccountRepository {
 
 	public static AccountRepository getInstance() {
 		if (instance == null) {
-
 			synchronized (AccountRepository.class) {
 				if (instance == null) {
 					instance = new AccountRepository();
 				}
 			}
-
 		}
-
 		return instance;
 	}
 
@@ -69,15 +70,81 @@ public class AccountRepository {
 
 	}
 
-	public void addMoney(int amt, int accountId) {
+	public boolean addMoney(int amt, int accountId) {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		Query<Account> query = session.createQuery("from Account  where accountNum=:accNum", Account.class);
 		query.setParameter("accNum", accountId);
-		Account fetchedAccDetails = query.getSingleResult();
+		Account fetchedAccDetails = query.setMaxResults(1).uniqueResult();
+		if (fetchedAccDetails == null) {
+			throw new RuntimeException("account not found.");
+		}
 		fetchedAccDetails.setBalance(fetchedAccDetails.getBalance() + amt);
-		transaction.commit();
+		try {
+			transaction.commit();
+		} catch (RollbackException exc) {
+			LOGGER.error("Exception while adding money.", exc);
+			return false;
+		}
 		session.close();
+		return true;
+	}
+
+	public boolean earMarkAccount(int accountId, int amount) {
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		Query<Account> query = session.createQuery("from Account  where accountNum=:accNum", Account.class);
+		query.setParameter("accNum", accountId);
+		Account account = query.setMaxResults(1).uniqueResult();
+		account.setBalance(account.getBalance() - amount);
+		account.setEarmarkedAmt(account.getEarmarkedAmt() + amount);
+		try {
+			transaction.commit();
+		} catch (RollbackException exc) {
+			LOGGER.error("Exception while earmarking amount.", exc);
+			return false;
+		}
+		session.close();
+		return true;
+	}
+
+	public boolean reduceEarMarkedAmount(int accountId, int amount) {
+
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		Query<Account> query = session.createQuery("from Account  where accountNum=:accNum", Account.class);
+		query.setParameter("accNum", accountId);
+		Account account = query.setMaxResults(1).uniqueResult();
+		account.setEarmarkedAmt(account.getEarmarkedAmt() - amount);
+		try {
+			transaction.commit();
+		} catch (RollbackException exc) {
+			LOGGER.error("Exception while earmarking amount.", exc);
+			return false;
+		}
+		session.close();
+		return true;
+
+	}
+
+	public boolean rollbackEarmarkedAmount(int accountId, int amount) {
+
+		Session session = sessionFactory.openSession();
+		Transaction transaction = session.beginTransaction();
+		Query<Account> query = session.createQuery("from Account  where accountNum=:accNum", Account.class);
+		query.setParameter("accNum", accountId);
+		Account account = query.setMaxResults(1).uniqueResult();
+		account.setBalance(account.getBalance() + amount);
+		account.setEarmarkedAmt(account.getEarmarkedAmt() - amount);
+		try {
+			transaction.commit();
+		} catch (RollbackException exc) {
+			LOGGER.error("Exception while earmarking amount.", exc);
+			return false;
+		}
+		session.close();
+		return true;
+
 	}
 
 }

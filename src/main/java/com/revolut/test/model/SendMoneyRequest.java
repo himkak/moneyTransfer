@@ -1,9 +1,12 @@
 package com.revolut.test.model;
 
+import lombok.Data;
+
+@Data
 public class SendMoneyRequest {
 
-	public int fromAccountNumber;
-	public int toAccountNumber;
-	public int amount;
+	private int fromAccountNumber;
+	private int toAccountNumber;
+	private int amount;
 
 }

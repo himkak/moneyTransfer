@@ -23,13 +23,16 @@ Implementaion for money transfers between accounts.</description>
 			<version>2.3.3</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.restlet.jee</groupId>
+			<artifactId>org.restlet.ext.jaxrs</artifactId>
+			<version>2.3.1</version>
+		</dependency>
 
 
-		<!-- <dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.7.12</version>
-		</dependency> -->
+
+		<!-- <dependency> <groupId>org.slf4j</groupId> <artifactId>slf4j-api</artifactId> 
+			<version>1.7.12</version> </dependency> -->
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
@@ -37,11 +40,9 @@ Implementaion for money transfers between accounts.</description>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.restlet.jee/org.restlet.ext.slf4j -->
-		<!-- <dependency>
-			<groupId>org.restlet.jee</groupId>
-			<artifactId>org.restlet.ext.slf4j</artifactId>
-			<version>2.2.1</version>
-		</dependency> -->
+		<!-- <dependency> <groupId>org.restlet.jee</groupId> <artifactId>org.restlet.ext.slf4j</artifactId> 
+			<version>2.2.1</version> </dependency> -->
+
 
 
 
@@ -50,6 +51,7 @@ Implementaion for money transfers between accounts.</description>
 			<artifactId>javax.ws.rs-api</artifactId>
 			<version>2.0</version>
 		</dependency>
+
 
 		<dependency>
 			<groupId>com.h2database</groupId>

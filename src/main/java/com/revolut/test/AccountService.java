@@ -12,11 +12,15 @@ import org.slf4j.MDC;
 
 import com.revolut.test.entity.Account;
 import com.revolut.test.entity.AccountState;
+import com.revolut.test.entity.TransactionHistory;
+import com.revolut.test.entity.TransactionState;
+import com.revolut.test.entity.TransactionStatus;
 import com.revolut.test.entity.UserDetails;
 import com.revolut.test.model.AccountInfo;
 import com.revolut.test.model.AddMoneyRequest;
 import com.revolut.test.model.CreateAccountRequest;
 import com.revolut.test.model.SendMoneyRequest;
+import com.revolut.test.model.TransactionHistoryResponse;
 import com.revolut.test.model.UserAccountsInfo;
 
 public class AccountService {
@@ -25,6 +29,8 @@ public class AccountService {
 	private static AccountService instance = null;
 
 	private final AccountRepository accountRepo = AccountRepository.getInstance();
+
+	private final TransactionRepository transactionRepo = TransactionRepository.getInstance();
 
 	private AccountService() {
 
@@ -83,8 +89,10 @@ public class AccountService {
 	}
 
 	private Set<AccountInfo> getAccInfo(Set<Account> accounts) {
-		return accounts.stream().map(acc -> AccountInfo.builder().accountNum(acc.getAccountNum())
-				.balance(acc.getBalance()).earmarkedAmt(acc.getEarmarkedAmt()).version(acc.getVersion()).build()).collect(Collectors.toSet());
+		return accounts.stream()
+				.map(acc -> AccountInfo.builder().accountNum(acc.getAccountNum()).balance(acc.getBalance())
+						.earmarkedAmt(acc.getEarmarkedAmt()).version(acc.getVersion()).build())
+				.collect(Collectors.toSet());
 	}
 
 	public void addMoney(AddMoneyRequest req) {
@@ -94,39 +102,41 @@ public class AccountService {
 
 	public int sendMoney(SendMoneyRequest request) {
 		int requestId = getRandomNumber();
+		TransactionHistory transHist = new TransactionHistory(request.getFromAccountNumber(),
+				request.getToAccountNumber(), request.getAmount(), requestId);
+		transactionRepo.saveTransaction(transHist);
 		MDC.put("requestId", Integer.toString(requestId));
-		boolean isEarmarkSuccess = earMarkAccount(request.fromAccountNumber, request.amount);
+		boolean isEarmarkSuccess = accountRepo.earMarkAccount(request.getFromAccountNumber(), request.getAmount());
+		transactionRepo.saveTransactionState(new TransactionState(0, TransactionStatus.EARMARKED, transHist));
 		if (isEarmarkSuccess) {
-			boolean isAmtReceived = addAmtToAccount(request.toAccountNumber, request.amount);
+			boolean isAmtReceived = accountRepo.addMoney(request.getAmount(), request.getToAccountNumber());
+			transactionRepo.saveTransactionState(new TransactionState(0, TransactionStatus.TRANSFERRED, transHist));
 			if (isAmtReceived) {
-				reduceTheEarMarkedAmount(request.fromAccountNumber, request.amount);
+				accountRepo.reduceEarMarkedAmount(request.getFromAccountNumber(), request.getAmount());
+				transactionRepo.saveTransactionState(
+						new TransactionState(0, TransactionStatus.RECEIVER_EARMARKUPDATED, transHist));
 				LOGGER.info("Transaction successful");
-			}else{
-				rollbackEarmarkedAmount(request.fromAccountNumber, request.amount);
+				transactionRepo.saveTransactionState(new TransactionState(0, TransactionStatus.SUCCESS, transHist));
+			} else {
+				accountRepo.rollbackEarmarkedAmount(request.getFromAccountNumber(), request.getAmount());
+				transactionRepo.saveTransactionState(new TransactionState(0, TransactionStatus.ROLLEDBACK, transHist));
 			}
 		}
 
 		return requestId;
 	}
 
-	private void rollbackEarmarkedAmount(int fromAccountNumber, int amount) {
-		// TODO Auto-generated method stub
-		
+	public List<TransactionHistoryResponse> getAllTransactions() {
+		List<TransactionHistory> fetchedTxnHisty = transactionRepo.getAllTransactions();
+
+		return fetchedTxnHisty.stream().map(txn -> TransactionHistoryResponse.builder()
+				.fromAccount(txn.getFromAccountId()).toAccount(txn.getToAccountId()).states(getStates(txn)).build())
+				.collect(Collectors.toList());
+
 	}
 
-	private void reduceTheEarMarkedAmount(int fromAccountNumber, int amount) {
-		// TODO Auto-generated method stub
-
-	}
-
-	private boolean addAmtToAccount(int toAccountNumber, int amount) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	private boolean earMarkAccount(int fromAccountNumber, int amount) {
-		// TODO Auto-generated method stub
-		return false;
+	private List<String> getStates(TransactionHistory txn) {
+		return txn.getTransStates().stream().map(state->state.getStatus().toString()).collect(Collectors.toList());
 	}
 
 }
