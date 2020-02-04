@@ -21,12 +21,12 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.revolut.test.application.SendMoneyServer;
-import com.revolut.test.entity.Account;
-import com.revolut.test.entity.UserDetails;
-import com.revolut.test.model.AccountResponse;
-import com.revolut.test.model.CreateAccountRequest;
-import com.revolut.test.util.HibernateUtil;
+import com.revolut.application.SendMoneyServer;
+import com.revolut.entity.Account;
+import com.revolut.entity.UserDetails;
+import com.revolut.model.AccountResponse;
+import com.revolut.model.CreateAccountRequest;
+import com.revolut.util.HibernateUtil;
 
 public class CreateAccountTest {
 	@Before

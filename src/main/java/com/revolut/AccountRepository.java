@@ -1,4 +1,4 @@
-package com.revolut.test;
+package com.revolut;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,9 +12,9 @@ import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.revolut.test.entity.Account;
-import com.revolut.test.entity.UserDetails;
-import com.revolut.test.util.HibernateUtil;
+import com.revolut.entity.Account;
+import com.revolut.entity.UserDetails;
+import com.revolut.util.HibernateUtil;
 
 public class AccountRepository {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AccountService.class);

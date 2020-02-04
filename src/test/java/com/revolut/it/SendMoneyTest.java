@@ -23,14 +23,14 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.revolut.test.application.SendMoneyServer;
-import com.revolut.test.entity.Account;
-import com.revolut.test.exception.ErrorResponse;
-import com.revolut.test.model.AccountResponse;
-import com.revolut.test.model.AddMoneyRequest;
-import com.revolut.test.model.CreateAccountRequest;
-import com.revolut.test.model.SendMoneyRequest;
-import com.revolut.test.util.HibernateUtil;
+import com.revolut.application.SendMoneyServer;
+import com.revolut.entity.Account;
+import com.revolut.exception.ErrorResponse;
+import com.revolut.model.AccountResponse;
+import com.revolut.model.AddMoneyRequest;
+import com.revolut.model.CreateAccountRequest;
+import com.revolut.model.SendMoneyRequest;
+import com.revolut.util.HibernateUtil;
 
 public class SendMoneyTest {
 

@@ -1,4 +1,4 @@
-package com.revolut.test.util;
+package com.revolut.util;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;

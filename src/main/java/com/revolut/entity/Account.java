@@ -1,4 +1,4 @@
-package com.revolut.test.entity;
+package com.revolut.entity;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;

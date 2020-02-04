@@ -1,4 +1,4 @@
-package com.revolut.test;
+package com.revolut;
 
 import java.util.List;
 
@@ -6,9 +6,9 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
-import com.revolut.test.entity.TransactionHistory;
-import com.revolut.test.entity.TransactionState;
-import com.revolut.test.util.HibernateUtil;
+import com.revolut.entity.TransactionHistory;
+import com.revolut.entity.TransactionState;
+import com.revolut.util.HibernateUtil;
 
 public class TransactionRepository {
 

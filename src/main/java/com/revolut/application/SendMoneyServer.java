@@ -1,4 +1,4 @@
-package com.revolut.test.application;
+package com.revolut.application;
 
 import org.restlet.Component;
 import org.restlet.Server;

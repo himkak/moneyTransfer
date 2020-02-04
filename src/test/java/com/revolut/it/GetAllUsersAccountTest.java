@@ -19,9 +19,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.revolut.test.application.SendMoneyServer;
-import com.revolut.test.model.CreateAccountRequest;
-import com.revolut.test.model.UserAccountsInfo;
+import com.revolut.application.SendMoneyServer;
+import com.revolut.model.CreateAccountRequest;
+import com.revolut.model.UserAccountsInfo;
 
 public class GetAllUsersAccountTest {
 

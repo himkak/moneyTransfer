@@ -1,10 +1,10 @@
-package com.revolut.test.application;
+package com.revolut.application;
 
 import org.restlet.Context;
 import org.restlet.ext.jaxrs.JaxRsApplication;
 
-import com.revolut.test.exception.ExceptionHandler;
-import com.revolut.test.util.HibernateUtil;
+import com.revolut.exception.ExceptionHandler;
+import com.revolut.util.HibernateUtil;
 
 public class SendMoneyApplication extends JaxRsApplication {
 

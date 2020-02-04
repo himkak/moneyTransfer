@@ -1,4 +1,4 @@
-package com.revolut.test.application;
+package com.revolut.application;
 
 import java.util.HashSet;
 import java.util.Set;

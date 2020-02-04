@@ -6,8 +6,9 @@ import org.hibernate.Session;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.revolut.test.entity.UserDetails;
-import com.revolut.test.util.HibernateUtil;
+import com.revolut.AccountRepository;
+import com.revolut.entity.UserDetails;
+import com.revolut.util.HibernateUtil;
 
 
 public class AccountRepositoryTest {

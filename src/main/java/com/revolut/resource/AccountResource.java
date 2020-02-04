@@ -11,13 +11,13 @@ import org.restlet.resource.ServerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.revolut.test.AccountService;
-import com.revolut.test.model.AccountResponse;
-import com.revolut.test.model.AddMoneyRequest;
-import com.revolut.test.model.AddMoneyResponse;
-import com.revolut.test.model.CreateAccountRequest;
-import com.revolut.test.model.MoneyTransferResponse;
-import com.revolut.test.model.SendMoneyRequest;
+import com.revolut.AccountService;
+import com.revolut.model.AccountResponse;
+import com.revolut.model.AddMoneyRequest;
+import com.revolut.model.AddMoneyResponse;
+import com.revolut.model.CreateAccountRequest;
+import com.revolut.model.MoneyTransferResponse;
+import com.revolut.model.SendMoneyRequest;
 
 @Path("/accounts/v1")
 @Consumes(MediaType.APPLICATION_JSON)

@@ -1,4 +1,4 @@
-package com.revolut.test.model;
+package com.revolut.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.revolut.test.entity;
+package com.revolut.entity;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;

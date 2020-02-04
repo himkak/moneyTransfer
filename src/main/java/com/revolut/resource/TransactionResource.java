@@ -12,8 +12,8 @@ import org.restlet.resource.ServerResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.revolut.test.AccountService;
-import com.revolut.test.model.TransactionHistoryResponse;
+import com.revolut.AccountService;
+import com.revolut.model.TransactionHistoryResponse;
 
 @Path("/transactions/v1")
 @Consumes(MediaType.APPLICATION_JSON)

@@ -1,4 +1,4 @@
-package com.revolut.test.exception;
+package com.revolut.exception;
 
 import org.restlet.Request;
 import org.restlet.Response;

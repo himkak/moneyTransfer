@@ -10,8 +10,8 @@ import javax.ws.rs.core.MediaType;
 
 import org.restlet.resource.ServerResource;
 
-import com.revolut.test.AccountService;
-import com.revolut.test.model.UserAccountsInfo;
+import com.revolut.AccountService;
+import com.revolut.model.UserAccountsInfo;
 
 @Path("/users/v1")
 @Consumes(MediaType.APPLICATION_JSON)

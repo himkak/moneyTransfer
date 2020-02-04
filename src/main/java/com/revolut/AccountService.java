@@ -1,4 +1,4 @@
-package com.revolut.test;
+package com.revolut;
 
 import java.util.HashSet;
 import java.util.List;
@@ -10,18 +10,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import com.revolut.test.entity.Account;
-import com.revolut.test.entity.AccountState;
-import com.revolut.test.entity.TransactionHistory;
-import com.revolut.test.entity.TransactionState;
-import com.revolut.test.entity.TransactionStatus;
-import com.revolut.test.entity.UserDetails;
-import com.revolut.test.model.AccountInfo;
-import com.revolut.test.model.AddMoneyRequest;
-import com.revolut.test.model.CreateAccountRequest;
-import com.revolut.test.model.SendMoneyRequest;
-import com.revolut.test.model.TransactionHistoryResponse;
-import com.revolut.test.model.UserAccountsInfo;
+import com.revolut.entity.Account;
+import com.revolut.entity.AccountState;
+import com.revolut.entity.TransactionHistory;
+import com.revolut.entity.TransactionState;
+import com.revolut.entity.TransactionStatus;
+import com.revolut.entity.UserDetails;
+import com.revolut.model.AccountInfo;
+import com.revolut.model.AddMoneyRequest;
+import com.revolut.model.CreateAccountRequest;
+import com.revolut.model.SendMoneyRequest;
+import com.revolut.model.TransactionHistoryResponse;
+import com.revolut.model.UserAccountsInfo;
 
 public class AccountService {
 
