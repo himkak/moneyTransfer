@@ -14,7 +14,9 @@ import org.slf4j.LoggerFactory;
 import com.revolut.test.AccountService;
 import com.revolut.test.model.AccountResponse;
 import com.revolut.test.model.AddMoneyRequest;
+import com.revolut.test.model.AddMoneyResponse;
 import com.revolut.test.model.CreateAccountRequest;
+import com.revolut.test.model.MoneyTransferResponse;
 import com.revolut.test.model.SendMoneyRequest;
 
 @Path("/accounts/v1")
@@ -35,14 +37,16 @@ public class AccountResource extends ServerResource {
 
 	@PUT
 	@Path("/transfer")
-	public int sendMoney(SendMoneyRequest request) {
-		return accountService.sendMoney(request);
+	public MoneyTransferResponse sendMoney(SendMoneyRequest request) {
+		int txnId= accountService.sendMoney(request);
+		return new MoneyTransferResponse(txnId);
 	}
 
 	@PUT
 	@Path("/money")
-	public boolean addMoney(AddMoneyRequest req) {
-		return accountService.addMoney(req);
+	public AddMoneyResponse addMoney(AddMoneyRequest req) {
+		boolean isAdded= accountService.addMoney(req);
+		return new AddMoneyResponse(isAdded);
 	}
 
 }

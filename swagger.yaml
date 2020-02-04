@@ -1,107 +1,193 @@
-swagger: "2.0"
+swagger: '2.0'
 info:
-  description: "This is a sample server Petstore server.  You can find out more about     Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).      For this sample, you can use the api key `special-key` to test the authorization     filters."
-  version: "1.0.0"
-  title: "Swagger sendMoney use case"
-  termsOfService: "http://swagger.io/terms/"
-  contact:
-    email: "apiteam@swagger.io"
-  license:
-    name: "Apache 2.0"
-    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-host: "account.swagger.io"
-basePath: "/v1"
-tags:
-- name: "accounts"
-  description: "Account resource"
-  externalDocs:
-    description: "Find out more"
-    url: "http://swagger.io"
-
-schemes:
-- "http"
+  description: defaultDescription
+  version: "0.3"
+  title: defaultTitle
 paths:
-  /accounts:
+  /accounts/v1:
     post:
       tags:
       - "accounts"
       summary: "Add a new account into DB"
-      description: ""
-      operationId: "createAccount"
       consumes:
-      - "application/json"
+        - application/json
       produces:
-      - "application/json"
+        - application/json
       parameters:
-      - in: "body"
-        name: "body"
-        description: "Account details that is needed to be added to the DB"
-        required: true
-        schema:
-          $ref: "#/definitions/User"
+        - in: body
+          name: body
+          required: false
+          schema:
+            $ref: '#/definitions/CreateAccountRequest'
+          x-examples:
+            application/json: "{\n\t\"userName\":\"him3\"\n\t\n}"
       responses:
-        201:
-          description: "Created"
-        405:
-          description: "Invalid input"
-  /accounts/transfer:
-   put:
+        '200':
+          description: Definition generated from Swagger Inspector
+          schema:
+            $ref: '#/definitions/AccountResponse'
+  /accounts/v1/money:
+    put:
       tags:
       - "accounts"
-      summary: "To transfer money from sender to receiver"
-      description: "To transfer money from sender to receiver"
-      operationId: "transferMoney"
+      summary: "Add money to account"
       consumes:
-      - "application/json"
+        - application/json
       produces:
-      - "application/json"
+        - application/json
       parameters:
-      - in: "body"
-        name: "body"
-        description: "Account details that is needed to be added to the DB"
-        required: true
-        schema:
-          $ref: "#/definitions/Transfer"
+        - in: body
+          name: body
+          required: false
+          schema:
+            $ref: '#/definitions/AddMoneyRequest'
+          x-examples:
+            application/json: "{\n\t\"accountId\":1462906219,\n\t\"amt\":100\n}"
       responses:
-       200:
-         description: OK
-   
-    
-
-
+        '200':
+          description: Definition generated from Swagger Inspector
+          schema:
+            $ref: '#/definitions/AddMoneyResponse'
+  /accounts/v1/transfer:
+    put:
+      tags:
+      - "accounts"
+      summary: "Transfer money from one account to another"
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          required: false
+          schema:
+            $ref: '#/definitions/SendMoneyRequest'
+          x-examples:
+            application/json: "{\n\t\"fromAccountNumber\":1462906219,\n\t\"toAccountNumber\":1017086736,\n\t\"amount\":10\n}"
+      responses:
+        '200':
+          description: Definition generated from Swagger Inspector
+          schema:
+            $ref: '#/definitions/MoneyTransferResponse'
+  '/users/v1':
+    get:
+      tags:
+      - "users"
+      summary: "Get all users with their accounts"
+      produces:
+        - application/json
+      parameters:
+        - name: param0
+          in: path
+          description: 'Example values form path are: ''users'' and ''transactions'''
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Definition generated from Swagger Inspector
+          schema:
+            $ref: '#/definitions/Model4'
+  '/transactions/v1':
+    get:
+      tags:
+      - "transactions"
+      summary: "Get all the transactions history"
+      produces:
+        - application/json
+      parameters:
+        - name: param0
+          in: path
+          description: 'Example values form path are: ''users'' and ''transactions'''
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Definition generated from Swagger Inspector
+          schema:
+            $ref: '#/definitions/TrModel'
 definitions:
-  User:
-    type: "object"
+  AddMoneyRequest:
+    properties:
+      accountId:
+        type: integer
+        format: int32
+      amt:
+        type: integer
+        format: int32
+  SendMoneyRequest:
+    properties:
+      fromAccountNumber:
+        type: integer
+        format: int32
+      toAccountNumber:
+        type: integer
+        format: int32
+      amount:
+        type: integer
+        format: int32
+  CreateAccountRequest:
     properties:
       userName:
         type: string
-        
+  AccountResponse:
+    properties:
+      accountId:
+        type: integer
+        format: int32
+  UserAccount:
+    properties:
+      accountNum:
+        type: integer
+        format: int32
+      balance:
+        type: integer
+        format: int32
+      earmarkedAmt:
+        type: integer
+        format: int32
+      version:
+        type: integer
+        format: int32
+  Array:
+    properties:
+      userName:
+        type: string
       userId:
-        type: "integer" 
-  Transfer:
-    type: "object"
+        type: string
+      userAccount:
+        type: array
+        items:
+          $ref: '#/definitions/UserAccount'
+  Model4:
+    type: array
+    items:
+      $ref: '#/definitions/Array'
+  AddMoneyResponse:
+    properties:
+      isAdded:
+        type: boolean
+  MoneyTransferResponse:
+    properties:
+      transactionId:
+        type: integer
+        format: int32
+  TrArray:
     properties:
       fromAccount:
-        type: "integer"
-        format: "int64"
+        type: integer
+        format: int32
       toAccount:
-        type: "integer"
-        format: "int64"
+        type: integer
+        format: int32
       amount:
-        type: "integer"
-        format: "int32"
-
-
-  FailureResponse:
-    type: "object"
-    properties:
-      code:
-        type: "integer"
-        format: "int32"
-      type:
-        type: "string"
-      message:
-        type: "string"
-externalDocs:
-  description: "Find out more about Swagger"
-  url: "http://swagger.io"
+        type: integer
+        format: int32
+      states:
+        type: array
+        items:
+          type: string
+  TrModel:
+    type: array
+    items:
+      $ref: '#/definitions/TrArray'
