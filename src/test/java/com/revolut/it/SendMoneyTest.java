@@ -17,13 +17,13 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -86,8 +86,7 @@ public class SendMoneyTest {
 		String resp1 = createAccount("him1");
 		AccountResponse receiverAccountInfo = objMapper.readValue(resp1, AccountResponse.class);
 
-		HttpResponse response = sendMoney(senderAccountInfo.getAccountId(), receiverAccountInfo.getAccountId(),
-				10);
+		HttpResponse response = sendMoney(senderAccountInfo.getAccountId(), receiverAccountInfo.getAccountId(), 10);
 		Assert.assertEquals(500, response.getStatusLine().getStatusCode());
 		ErrorResponse errResp = objMapper.readValue(EntityUtils.toString(response.getEntity()), ErrorResponse.class);
 		Assert.assertEquals("Insufficient balance in sender's account.", errResp.getMessgae());
@@ -100,15 +99,13 @@ public class SendMoneyTest {
 
 		addMoney(senderAccountInfo.getAccountId(), 100);
 		AccountResponse receiverAccountInfo = objMapper.readValue(createAccount("him1"), AccountResponse.class);
-		HttpResponse response = sendMoney(senderAccountInfo.getAccountId(), receiverAccountInfo.getAccountId(),
-				10);
+		HttpResponse response = sendMoney(senderAccountInfo.getAccountId(), receiverAccountInfo.getAccountId(), 10);
 		Assert.assertEquals(200, response.getStatusLine().getStatusCode());
 		Account senderAccInfo = fetchAccountInfo(senderAccountInfo.getAccountId());
 		Assert.assertEquals(90, senderAccInfo.getBalance());
 	}
 
 	@Test
-	@Ignore
 	public void shouldSendMoneyConcurrently_when_SenderHavingAdequateBalanceAndReceiverExists()
 			throws JsonProcessingException, IOException, InterruptedException {
 		int totalAmtOfSender = 100;
@@ -124,10 +121,14 @@ public class SendMoneyTest {
 		allRequests.add(getSendMoneyReq(senderAccountInfo, receiver2AccountInfo, 10));
 		allRequests.add(getSendMoneyReq(senderAccountInfo, receiver3AccountInfo, 10));
 
-		HttpClient client = HttpClients.createDefault();
+		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+		connectionManager.setMaxTotal(20);
+		connectionManager.setDefaultMaxPerRoute(5);
 
-		List<CompletableFuture<HttpResponse>> futures = allRequests.stream()
-				.map(req -> CompletableFuture.supplyAsync(()->{
+		HttpClient client = HttpClients.custom().setConnectionManager(connectionManager).build();
+
+		List<CompletableFuture<HttpResponse>> futures = allRequests.parallelStream()
+				.map(req -> CompletableFuture.supplyAsync(() -> {
 					try {
 						return client.execute(req);
 					} catch (ClientProtocolException e1) {
@@ -155,15 +156,14 @@ public class SendMoneyTest {
 		Assert.assertEquals(totalAmtOfSender, successOps * 10 + currBalanceOfSender);
 
 	}
-	
-	
-	private HttpUriRequest getSendMoneyReq(AccountResponse senderAccountInfo, AccountResponse receiverAccountInfo, int amt)
-			throws JsonProcessingException, UnsupportedEncodingException {
+
+	private HttpUriRequest getSendMoneyReq(AccountResponse senderAccountInfo, AccountResponse receiverAccountInfo,
+			int amt) throws JsonProcessingException, UnsupportedEncodingException {
 		SendMoneyRequest req = new SendMoneyRequest(senderAccountInfo.getAccountId(),
 				receiverAccountInfo.getAccountId(), amt);
 
 		String requestStr = objMapper.writeValueAsString(req);
-		
+
 		HttpPut httpPost = new HttpPut("http://localhost:8080/accounts/v1/transfer");
 		httpPost.setHeader("Content-Type", "application/json");
 		httpPost.setEntity(new StringEntity(requestStr));
@@ -174,13 +174,13 @@ public class SendMoneyTest {
 			throws JsonProcessingException, IOException, InterruptedException {
 		SendMoneyRequest req = new SendMoneyRequest(fromAccountId, toAccountId, amount);
 		String requestStr = objMapper.writeValueAsString(req);
-		
+
 		HttpClient client = HttpClients.createDefault();
 		HttpPut httpPost = new HttpPut("http://localhost:8080/accounts/v1/transfer");
 		httpPost.setHeader("Content-Type", "application/json");
 		httpPost.setEntity(new StringEntity(requestStr));
 		HttpResponse resp = client.execute(httpPost);
-	
+
 		return resp;
 	}
 
@@ -196,23 +196,21 @@ public class SendMoneyTest {
 	private void addMoney(int accountId, int amt) throws IOException, InterruptedException {
 		AddMoneyRequest req = new AddMoneyRequest(accountId, amt);
 		String requestStr = objMapper.writeValueAsString(req);
-		
+
 		HttpClient client = HttpClients.createDefault();
 		HttpPut httpPost = new HttpPut("http://localhost:8080/accounts/v1/money");
 		httpPost.setHeader("Content-Type", "application/json");
 		httpPost.setEntity(new StringEntity(requestStr));
 		HttpResponse resp = client.execute(httpPost);
-		
+
 		Assert.assertEquals(200, resp.getStatusLine().getStatusCode());
 	}
 
-	private String createAccount(String userName)
-			throws JsonProcessingException, IOException, InterruptedException {
-		
-		
+	private String createAccount(String userName) throws JsonProcessingException, IOException, InterruptedException {
+
 		CreateAccountRequest req = new CreateAccountRequest(userName);
 		String requestStr = objMapper.writeValueAsString(req);
-		
+
 		HttpClient client = HttpClients.createDefault();
 		HttpPost httpPost = new HttpPost("http://localhost:8080/accounts/v1");
 		httpPost.setHeader("Content-Type", "application/json");

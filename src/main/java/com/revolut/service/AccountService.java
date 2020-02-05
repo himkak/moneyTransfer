@@ -77,7 +77,7 @@ public class AccountService {
 
 	public int sendMoney(SendMoneyRequest request) {
 		int requestId = getRandomNumber();
-
+		LOGGER.debug("TransactionId for request :{} , generated is :{}", request, requestId);
 		checkAccounts(request);
 		checkBalance(request);
 
@@ -118,6 +118,7 @@ public class AccountService {
 	}
 
 	private void rollback(SendMoneyRequest request, TransactionHistory transHist) {
+		LOGGER.debug("ROLLEDBACK");
 		accountRepo.rollbackEarmarkedAmount(request.getFromAccountNumber(), request.getAmount());
 		TransactionState txnState = transactionServ.saveTransactionState(TransactionStatus.ROLLEDBACK, transHist);
 		transHist.getTransStates().add(txnState);
@@ -130,6 +131,7 @@ public class AccountService {
 	}
 
 	private void updateReceiverEarmark(SendMoneyRequest request, TransactionHistory transHist) {
+		LOGGER.debug("RECEIVER_EARMARKUPDATED");
 		accountRepo.reduceEarMarkedAmount(request.getFromAccountNumber(), request.getAmount());
 		TransactionState txnState = transactionServ.saveTransactionState(TransactionStatus.RECEIVER_EARMARKUPDATED,
 				transHist);
@@ -137,6 +139,7 @@ public class AccountService {
 	}
 
 	private boolean transferToReceiverAccount(SendMoneyRequest request, TransactionHistory transHist) {
+		LOGGER.debug("TRANSFERRED");
 		boolean isAmtReceived = accountRepo.addMoney(request.getAmount(), request.getToAccountNumber());
 		TransactionState txnState = transactionServ.saveTransactionState(TransactionStatus.TRANSFERRED, transHist);
 		transHist.getTransStates().add(txnState);
@@ -144,6 +147,7 @@ public class AccountService {
 	}
 
 	private boolean earMarkReceiverAccount(SendMoneyRequest request, TransactionHistory transHist) {
+		LOGGER.debug("Earmak done.");
 		boolean isEarmarkSuccess = accountRepo.earMarkAccount(request.getFromAccountNumber(), request.getAmount());
 		transHist.setTransStates(new HashSet<>());
 		TransactionState txnState = transactionServ.saveTransactionState(TransactionStatus.EARMARKED, transHist);

@@ -38,6 +38,7 @@ public class AccountResource extends ServerResource {
 	@PUT
 	@Path("/transfer")
 	public MoneyTransferResponse sendMoney(SendMoneyRequest request) {
+		LOGGER.debug("Request received to transfer money : {}",request);
 		int txnId= accountService.sendMoney(request);
 		return new MoneyTransferResponse(txnId);
 	}
