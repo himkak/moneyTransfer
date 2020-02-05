@@ -1,15 +1,15 @@
 package com.revolut.it;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpRequest.BodyPublishers;
-import java.net.http.HttpResponse;
-import java.net.http.HttpResponse.BodyHandlers;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.junit.After;
@@ -29,6 +29,7 @@ import com.revolut.model.CreateAccountRequest;
 import com.revolut.util.HibernateUtil;
 
 public class CreateAccountTest {
+
 	@Before
 	public void setup() throws Exception {
 		SendMoneyServer.main(null);
@@ -45,16 +46,16 @@ public class CreateAccountTest {
 	public void shouldCreateUserAndAccount_when_newUserProvided() throws IOException, InterruptedException {
 
 		String userName = "Him";
-		HttpResponse<String> resp = createAccount(userName);
+		HttpResponse resp = createAccount(userName);
 
-		Assert.assertEquals(200, resp.statusCode());
+		Assert.assertEquals(200, resp.getStatusLine().getStatusCode());
 		assertAccountAndUserCount(userName, resp, 1);
 
 	}
 
-	private void assertAccountAndUserCount(String userName, HttpResponse<String> resp, int noOfAccounts)
+	private void assertAccountAndUserCount(String userName, HttpResponse resp, int noOfAccounts)
 			throws IOException, JsonParseException, JsonMappingException {
-		AccountResponse accountInfo = objMapper.readValue(resp.body(), AccountResponse.class);
+		AccountResponse accountInfo = objMapper.readValue(EntityUtils.toString(resp.getEntity()), AccountResponse.class);
 		int accountId = accountInfo.getAccountId();
 		Session session = HibernateUtil.getSessionFactory().openSession();
 		Query<Account> queryAccount = session.createQuery("from Account where accountNum=:accountNum", Account.class);
@@ -67,12 +68,12 @@ public class CreateAccountTest {
 		Assert.assertEquals(1, queryUser.list().size());
 	}
 
-	private void assertMultiAccountAndUserCount(String userName, List<HttpResponse<String>> responseList,
+	private void assertMultiAccountAndUserCount(String userName, List<HttpResponse> responseList,
 			int noOfAccounts) throws IOException, JsonParseException, JsonMappingException {
 
 		for (int i = 0; i < responseList.size(); i++) {
-			HttpResponse<String> resp = responseList.get(i);
-			AccountResponse accountInfo = objMapper.readValue(resp.body(), AccountResponse.class);
+			HttpResponse resp = responseList.get(i);
+			AccountResponse accountInfo = objMapper.readValue(EntityUtils.toString(resp.getEntity()), AccountResponse.class);
 			int accountId = accountInfo.getAccountId();
 			Session session = HibernateUtil.getSessionFactory().openSession();
 			Query<Account> queryAccount = session.createQuery("from Account where accountNum=:accountNum",
@@ -87,14 +88,17 @@ public class CreateAccountTest {
 		}
 	}
 
-	private HttpResponse<String> createAccount(String userName)
+	private HttpResponse createAccount(String userName)
 			throws JsonProcessingException, IOException, InterruptedException {
-		HttpClient client = HttpClient.newBuilder().build();
 		CreateAccountRequest req = new CreateAccountRequest(userName);
 		String requestStr = objMapper.writeValueAsString(req);
-		HttpRequest request = HttpRequest.newBuilder().header("Content-Type", "application/json")
-				.uri(URI.create("http://localhost:8080/accounts/v1")).POST(BodyPublishers.ofString(requestStr)).build();
-		HttpResponse<String> resp = client.send(request, BodyHandlers.ofString());
+		
+		HttpClient client = HttpClients.createDefault();
+		HttpPost httpPost = new HttpPost("http://localhost:8080/accounts/v1");
+		httpPost.setHeader("Content-Type", "application/json");
+		httpPost.setEntity(new StringEntity(requestStr));
+		HttpResponse resp = client.execute(httpPost);
+		
 		return resp;
 	}
 
@@ -102,18 +106,14 @@ public class CreateAccountTest {
 	public void shouldCreateAccountAndLinkToExistingUser_when_exitingUserProvided()
 			throws JsonProcessingException, IOException, InterruptedException {
 
-		// send a create user request
-		String userName="Him1";
-		HttpResponse<String> resp = createAccount(userName);
-		Assert.assertEquals(200, resp.statusCode());
+		String userName = "Him1";
+		HttpResponse resp = createAccount(userName);
+		Assert.assertEquals(200, resp.getStatusLine().getStatusCode());
 
-		HttpResponse<String> resp2 = createAccount(userName);
-		Assert.assertEquals(200, resp.statusCode());
-		// send a create user request
+		HttpResponse resp2 = createAccount(userName);
+		Assert.assertEquals(200, resp.getStatusLine().getStatusCode());
 
-		// fetch all users and assert
-		
-		assertMultiAccountAndUserCount(userName, Arrays.asList(resp,resp2), 2);
+		assertMultiAccountAndUserCount(userName, Arrays.asList(resp, resp2), 2);
 	}
 
 }

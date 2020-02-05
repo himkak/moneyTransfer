@@ -26,9 +26,9 @@
 		<property name="cache.provider_class">org.hibernate.cache.NoCacheProvider</property>
 		
 			
-		<mapping class="com.revolut.test.entity.UserDetails" />
-		<mapping class="com.revolut.test.entity.Account" />
-		<mapping class="com.revolut.test.entity.TransactionHistory" />
-		<mapping class="com.revolut.test.entity.TransactionState" />
+		<mapping class="com.revolut.entity.UserDetails" />
+		<mapping class="com.revolut.entity.Account" />
+		<mapping class="com.revolut.entity.TransactionHistory" />
+		<mapping class="com.revolut.entity.TransactionState" />
 	</session-factory>
 </hibernate-configuration>
