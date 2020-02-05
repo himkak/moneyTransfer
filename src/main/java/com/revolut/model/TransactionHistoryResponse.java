@@ -11,5 +11,6 @@ public class TransactionHistoryResponse {
 	private String toAccount;
 	private int amount;
 	private List<String> states;
+	private int txnId; 
 
 }

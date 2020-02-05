@@ -38,7 +38,7 @@ public class TransactionService {
 		List<TransactionHistory> fetchedTxnHisty = transactionRepo.getAllTransactions();
 
 		return fetchedTxnHisty.stream().map(txn -> TransactionHistoryResponse.builder()
-				.fromAccount(txn.getFromAccountId()).toAccount(txn.getToAccountId()).states(getStates(txn)).build())
+				.fromAccount(txn.getFromAccountId()).toAccount(txn.getToAccountId()).states(getStates(txn)).txnId(txn.getTransactionId()).amount(txn.getAmount()).build())
 				.collect(Collectors.toList());
 
 	}

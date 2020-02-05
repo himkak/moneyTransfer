@@ -134,3 +134,5 @@ This is an end to end solution implementation with the below APIs
 Integration tests have been written to test all the scenarios. In these tests the application 
 is started, client sends requests and asserts the response. Even the concurrency scenario has 
 been tested with that.
+
+To test postman script is also present.
