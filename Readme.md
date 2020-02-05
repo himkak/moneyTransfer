@@ -30,32 +30,32 @@ Please put your work on github or bitbucket.
 Detail out the comparison
 1. Http server Framework : Should be able to run without installing any server. LightWeight, 
    supports Rest, run as jar, high performance, concurrency
-     Restlet : Lightweight.  Supports major web standards. Many extensions also available to integrate like jackson, . Suitable for both server and client applications.
-     RestEay  
-     Jersey v2: A lightweight framework.  It is an implementation of the jax-rs standard, 
-        and many other frameworks can natively understand the jax-rs annotations. Open source. 
      
-     Apache CXF  
-     Dropwizard : A heavy framework. Lot of plumbing reqd even to build tiny service. Uses Jetty server
-     javalin :   
-     vertx : Uses Jetty server
-     spark  : 
-            Uses Jetty server
+    - Restlet : Lightweight.  Supports major web standards. Many extensions also available to integrate like jackson . Suitable for both server and client applications. 
+      Restlet has got bigger and more matured community around it
 
-    Comparison on points :
-        server being used
-        leight weight
-        logging
-        documentation
-        monitoring
-        in build features
+
+    - RestEay  : A bit heavy framework as its environment is JBOSS oriented.
+
+    - Jersey v2: A lightweight framework.  It is an implementation of the jax-rs standard, 
+        and many other frameworks can natively understand the jax-rs annotations. Open source. 
+
+    - Apache CXF : A bit heavy framework as it supports different protocols, supports 
+      soap also. 
+
+    - Dropwizard : A heavy framework. Lot of plumbing reqd even to build tiny service. Uses Jetty server
+
 
     References:
         https://cdelmas.github.io/2015/11/01/A-comparison-of-Microservices-Frameworks.html
+        https://javarevisited.blogspot.com/2017/02/difference-between-jax-rs-restlet-jersey-apache-cfx-RESTEasy.html
     
-    
+2. Http Client:
+   Apache http client  
 
-2. Logging
+2. Logging:
+   log4j has been used for logging.
+   
 3. Testing:
     Unit Testing : JUNIT
     Tools : 
@@ -65,10 +65,13 @@ Detail out the comparison
 4. DB :
     Requirement is to have in-memory DB
 
-   Relational: Provides ACID behavior. Vertically Scalable. More complex as have to maintain relationship. 
-    H2 is the in-memory DB 
-   NoSql : Horizontally scalable. Less complex. Schemaless.
-    Redis (embedded) can be used as in memory
+
+    - Relational: Provides ACID behavior. Vertically Scalable. More complex as have to maintain relationship. As 
+      this use case requires ACID behaviour so proceeding with relational.
+      H2 is the in-memory DB 
+
+    - NoSql : Horizontally scalable. Less complex. Schemaless.
+         Redis (embedded) can be used as in memory. Not appropriate for this usecase.
 
 5. ORM Framework : Hibernate
 
@@ -78,8 +81,6 @@ As the structure of the data is relational and we are looking for ACID behavior,
 
 5.
    
-
-## Use case
 
 ## How to Run
 
@@ -97,6 +98,18 @@ There are 3 configuration files:
 1) application.properties : to configure the application related configuration
 2) log4j.properties : TO configure the logging level
 3) hibernate.cfg.xml : Database related configuration
+
+### Try the APIs
+1)Load the swagger file in swagger editor.
+2)Execute the APIs from there
+ - Create user A Account
+ - Create user B Account
+ - Get all users accounts, to verify the balances as 0
+ - Topup money into A user's account
+ - Get all users accounts to check the updated balance
+ - Transfer money from user A's account to user B's account
+ - Get all users accounts to check the updated balance
+ - Get all the transaction history, to check the transaction done
 
 
 ## APIs : 
