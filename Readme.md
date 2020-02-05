@@ -58,9 +58,7 @@ Detail out the comparison
    
 3. Testing:
     Unit Testing : JUNIT
-    Tools : 
-        JMeter
-        SoapUI
+    
 
 4. DB :
     Requirement is to have in-memory DB
@@ -73,14 +71,11 @@ Detail out the comparison
     - NoSql : Horizontally scalable. Less complex. Schemaless.
          Redis (embedded) can be used as in memory. Not appropriate for this usecase.
 
-5. ORM Framework : Hibernate
-
+5. ORM Framework : Hibernate  
 As the structure of the data is relational and we are looking for ACID behavior, so preferring 
     relational H2 in-memory DB.
    
 
-5.
-   
 
 ## How to Run
 
@@ -134,3 +129,8 @@ This is an end to end solution implementation with the below APIs
 ### Transfer Money Flow
 
 ![Transfer Money flow](https://github.com/himkak/moneyTransfer/blob/master/FlowDiagram.jpg)
+
+## Tests
+Integration tests have been written to test all the scenarios. In these tests the application 
+is started, client sends requests and asserts the response. Even the concurrency scenario has 
+been tested with that.
