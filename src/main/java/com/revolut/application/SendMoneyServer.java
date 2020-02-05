@@ -19,7 +19,7 @@ public final class SendMoneyServer {
 
 	public static void main(final String[] args) throws Exception {
 		comp = new Component();
-		final Server server = comp.getServers().add(Protocol.HTTP, 8080);
+		final Server server = comp.getServers().add(Protocol.HTTP, Integer.parseInt(ConfigurationLoader.getInstance().getProperties("serverPort", "8080")));
 		final JaxRsApplication application = new SendMoneyApplication(comp.getContext());
 		application.add(new SendMoneySubApplication());
 		comp.getDefaultHost().attach(application);

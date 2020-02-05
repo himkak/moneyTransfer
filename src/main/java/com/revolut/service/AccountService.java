@@ -3,11 +3,13 @@ package com.revolut.service;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import com.revolut.application.ConfigurationLoader;
 import com.revolut.entity.Account;
 import com.revolut.entity.AccountState;
 import com.revolut.entity.TransactionHistory;
@@ -30,6 +32,9 @@ public class AccountService {
 
 	private final UserService usrServ = UserService.getInstance();
 
+	private int totalRetryCount = Integer.parseInt(ConfigurationLoader.getInstance().getProperties("totalRetryCount","5"));
+	private int retryInterval = Integer.parseInt(ConfigurationLoader.getInstance().getProperties("retryInterval","1000"));
+
 	private AccountService() {
 
 	}
@@ -45,7 +50,7 @@ public class AccountService {
 		return instance;
 	}
 
-	public int createAccount(CreateAccountRequest accntCreationReq) {
+	public String createAccount(CreateAccountRequest accntCreationReq) {
 		UserDetails userDetails = usrServ.getUserDetailsIfExistsElseCreate(accntCreationReq);
 		Set<Account> accounts = new HashSet<Account>();
 
@@ -62,8 +67,7 @@ public class AccountService {
 	}
 
 	private Account getNewAccount() {
-		return Account.builder().accountNum(getRandomNumber()).balance(0).earmarkedAmt(0).state(AccountState.ACTIVE)
-				.build();
+		return Account.builder().balance(0).earmarkedAmt(0).state(AccountState.ACTIVE).build();
 	}
 
 	private int getRandomNumber() {
@@ -84,14 +88,14 @@ public class AccountService {
 		TransactionHistory transHist = transactionServ.saveTransaction(requestId, request.getFromAccountNumber(),
 				request.getToAccountNumber(), request.getAmount());
 		MDC.put("requestId", Integer.toString(requestId));
-		boolean isEarmarkSuccess = earMarkReceiverAccount(request, transHist);
+		boolean isEarmarkSuccess = earMarkReceiverAccount(request, transHist, requestId);
 		if (isEarmarkSuccess) {
-			boolean isAmtReceived = transferToReceiverAccount(request, transHist);
+			boolean isAmtReceived = transferToReceiverAccount(request, transHist, requestId);
 			if (isAmtReceived) {
-				updateReceiverEarmark(request, transHist);
-				transactionSuccess(transHist);
+				updateReceiverEarmark(request, transHist, requestId);
+				transactionSuccess(transHist, requestId);
 			} else {
-				rollback(request, transHist);
+				rollback(request, transHist, requestId);
 			}
 		}
 
@@ -117,42 +121,73 @@ public class AccountService {
 		}
 	}
 
-	private void rollback(SendMoneyRequest request, TransactionHistory transHist) {
-		LOGGER.debug("ROLLEDBACK");
-		accountRepo.rollbackEarmarkedAmount(request.getFromAccountNumber(), request.getAmount());
+	private void rollback(SendMoneyRequest request, TransactionHistory transHist, int reqId) {
+		LOGGER.debug("Going to ROLLEDBACK., reqId:{}", reqId);
+		Supplier<Boolean> fnc = () -> accountRepo.rollbackEarmarkedAmount(request.getFromAccountNumber(),
+				request.getAmount());
+		retry(fnc);
 		TransactionState txnState = transactionServ.saveTransactionState(TransactionStatus.ROLLEDBACK, transHist);
 		transHist.getTransStates().add(txnState);
+		LOGGER.debug("ROLLEDBACK, reqId:{}", reqId);
 	}
 
-	private void transactionSuccess(TransactionHistory transHist) {
-		LOGGER.info("Transaction successful");
+	private void transactionSuccess(TransactionHistory transHist, int reqId) {
+		LOGGER.debug("Going to Transaction successful., reqId:{}", reqId);
 		TransactionState txnState = transactionServ.saveTransactionState(TransactionStatus.SUCCESS, transHist);
 		transHist.getTransStates().add(txnState);
+		LOGGER.info("Transaction successful, reqId:{}", reqId);
 	}
 
-	private void updateReceiverEarmark(SendMoneyRequest request, TransactionHistory transHist) {
-		LOGGER.debug("RECEIVER_EARMARKUPDATED");
-		accountRepo.reduceEarMarkedAmount(request.getFromAccountNumber(), request.getAmount());
+	private void updateReceiverEarmark(SendMoneyRequest request, TransactionHistory transHist, int reqId) {
+		LOGGER.debug("Going to RECEIVER_EARMARKUPDATED., reqId:{}", reqId);
+		Supplier<Boolean> fnc = () -> accountRepo.reduceEarMarkedAmount(request.getFromAccountNumber(),
+				request.getAmount());
+		retry(fnc);
 		TransactionState txnState = transactionServ.saveTransactionState(TransactionStatus.RECEIVER_EARMARKUPDATED,
 				transHist);
 		transHist.getTransStates().add(txnState);
+		LOGGER.debug("RECEIVER_EARMARKUPDATED , reqId:{}", reqId);
 	}
 
-	private boolean transferToReceiverAccount(SendMoneyRequest request, TransactionHistory transHist) {
-		LOGGER.debug("TRANSFERRED");
-		boolean isAmtReceived = accountRepo.addMoney(request.getAmount(), request.getToAccountNumber());
+	private boolean transferToReceiverAccount(SendMoneyRequest request, TransactionHistory transHist, int reqId) {
+		LOGGER.debug("Going to TRANSFERRED., reqId:{}", reqId);
+		Supplier<Boolean> fnc = () -> accountRepo.addMoney(request.getAmount(), request.getToAccountNumber());
+		boolean isAmtReceived = retry(fnc);
 		TransactionState txnState = transactionServ.saveTransactionState(TransactionStatus.TRANSFERRED, transHist);
 		transHist.getTransStates().add(txnState);
+		LOGGER.debug("TRANSFERRED, reqId:{}", reqId);
 		return isAmtReceived;
 	}
 
-	private boolean earMarkReceiverAccount(SendMoneyRequest request, TransactionHistory transHist) {
-		LOGGER.debug("Earmak done.");
-		boolean isEarmarkSuccess = accountRepo.earMarkAccount(request.getFromAccountNumber(), request.getAmount());
+	private boolean earMarkReceiverAccount(SendMoneyRequest request, TransactionHistory transHist, int reqId) {
+		LOGGER.debug("Going to Earmak., reqId:{}", reqId);
+		Supplier<Boolean> fnc = () -> accountRepo.earMarkAccount(request.getFromAccountNumber(), request.getAmount());
+		boolean isEarmarkSuccess = retry(fnc);
 		transHist.setTransStates(new HashSet<>());
 		TransactionState txnState = transactionServ.saveTransactionState(TransactionStatus.EARMARKED, transHist);
 		transHist.getTransStates().add(txnState);
+		LOGGER.debug("Earmak done., reqId:{}", reqId);
 		return isEarmarkSuccess;
+	}
+
+	private boolean retry(Supplier<Boolean> fnc) {
+
+		boolean isOpSuccess = false;
+		int retryCount = 0;
+		while (!isOpSuccess && retryCount < totalRetryCount) {
+			LOGGER.debug("Going to retry.");
+			isOpSuccess = fnc.get();
+			try {
+				
+				Thread.sleep(retryInterval);
+			} catch (InterruptedException e) {
+				LOGGER.warn("Exception while retrying");
+			}
+			retryCount++;
+			LOGGER.debug("Retry result:{}, count:{}",isOpSuccess, retryCount);
+		}
+		return isOpSuccess;
+
 	}
 
 }

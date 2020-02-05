@@ -83,19 +83,41 @@ As the structure of the data is relational and we are looking for ACID behavior,
 
 ## How to Run
 
-## APIs : swagger doc also present
-1. send money 
-   Http method : PUT
-   url : accounts/transfer/
-   request body: fromAccount, toAccount, amount
-   response : requestId
-   
-2. create account
-   Http method : POST
-   url: accounts
-   body: {userName, userId}
-   response : json : {accountNumber}, http status : 201
+### Prerequisites
+1)Maven should be installed
+2)Java should be installed
+
+### Steps to run the application
+1) Execute command : `mvn clean install`
+2) move to target folder
+3) execute command `java -jar moneytransfer-0.0.1-SNAPSHOT-shaded.jar`
+
+### Configuration
+There are 3 configuration files:
+1) application.properties : to configure the application related configuration
+2) log4j.properties : TO configure the logging level
+3) hibernate.cfg.xml : Database related configuration
+
+
+## APIs : 
+Swagger doc present, in the root of the project, named 'swagger.yaml'. Load it in swagger io editor.
+
 
 ## DB Structure
-1. Account table : accountNumber (pk), totalAmt, earmarkedAmt, userId, state (active/closed/blocked)
-2. User table : userId, userName
+1. Account table : accountNumber (pk), balance, earmarkedAmt, userId (fk), state (active/closed/blocked), version
+2. User table : userId (pk), userName
+3. TransactionHistory : fromAccountId, toAccountId, amount, transactionId (pk)
+4. TransactionState : id (pk), status (EARMARKED / TRANSFERRED / RECEIVER_EARMARKUPDATED / SUCCESS / ROLLEDBACK), transactionId (fk)
+
+
+## Solution Explanation :
+This is an end to end solution implementation with the below APIs
+1) Create user Account
+2) Topup money into an account
+3) Transfer money from one account to another
+4) Get all users accounts
+5) Get all the transaction history
+
+### Transfer Money Flow
+
+![Transfer Money flow](https://github.com/himkak/moneyTransfer/blob/master/FlowDiagram.jpg)

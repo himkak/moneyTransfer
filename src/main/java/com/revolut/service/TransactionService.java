@@ -47,7 +47,7 @@ public class TransactionService {
 		return txn.getTransStates().stream().map(state -> state.getStatus().toString()).collect(Collectors.toList());
 	}
 
-	public TransactionHistory saveTransaction(int txnId, int frmAcc, int toAcc, int amt) {
+	public TransactionHistory saveTransaction(int txnId, String frmAcc, String toAcc, int amt) {
 
 		TransactionHistory transHist = new TransactionHistory(frmAcc, toAcc, amt, txnId);
 		transactionRepo.saveTransaction(transHist);

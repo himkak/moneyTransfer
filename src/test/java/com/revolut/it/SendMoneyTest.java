@@ -55,7 +55,7 @@ public class SendMoneyTest {
 	public void shouldFailSendMoney_when_SenderAccountNumberInvalid()
 			throws JsonProcessingException, IOException, InterruptedException {
 
-		HttpResponse response = sendMoney(0, 1, 10);
+		HttpResponse response = sendMoney("0", "1", 10);
 
 		Assert.assertEquals(500, response.getStatusLine().getStatusCode());
 		ErrorResponse errResp = objMapper.readValue(EntityUtils.toString(response.getEntity()), ErrorResponse.class);
@@ -69,7 +69,7 @@ public class SendMoneyTest {
 
 		String resp = createAccount("him");
 		AccountResponse accountInfo = objMapper.readValue(resp, AccountResponse.class);
-		HttpResponse response = sendMoney(accountInfo.getAccountId(), 1, 10);
+		HttpResponse response = sendMoney(accountInfo.getAccountId(), "1", 10);
 
 		Assert.assertEquals(500, response.getStatusLine().getStatusCode());
 		ErrorResponse errResp = objMapper.readValue(EntityUtils.toString(response.getEntity()), ErrorResponse.class);
@@ -104,26 +104,29 @@ public class SendMoneyTest {
 		Account senderAccInfo = fetchAccountInfo(senderAccountInfo.getAccountId());
 		Assert.assertEquals(90, senderAccInfo.getBalance());
 	}
+	
+	@Test
+	public void print(){
+		int a='A';
+		System.out.println(a);
+	}
 
 	@Test
 	public void shouldSendMoneyConcurrently_when_SenderHavingAdequateBalanceAndReceiverExists()
 			throws JsonProcessingException, IOException, InterruptedException {
 		int totalAmtOfSender = 100;
 		AccountResponse senderAccountInfo = objMapper.readValue(createAccount("A"), AccountResponse.class);
-		AccountResponse receiver1AccountInfo = objMapper.readValue(createAccount("B"), AccountResponse.class);
-		AccountResponse receiver2AccountInfo = objMapper.readValue(createAccount("C"), AccountResponse.class);
-		AccountResponse receiver3AccountInfo = objMapper.readValue(createAccount("D"), AccountResponse.class);
 		addMoney(senderAccountInfo.getAccountId(), totalAmtOfSender);
 
-		List<HttpUriRequest> allRequests = new ArrayList<>(3);
+		List<HttpUriRequest> allRequests = new ArrayList<>();
 
-		allRequests.add(getSendMoneyReq(senderAccountInfo, receiver1AccountInfo, 10));
-		allRequests.add(getSendMoneyReq(senderAccountInfo, receiver2AccountInfo, 10));
-		allRequests.add(getSendMoneyReq(senderAccountInfo, receiver3AccountInfo, 10));
-
+		for (int i = 65, j=0; j < 40; i++,j++) {
+			allRequests.add(getSendMoneyReq(senderAccountInfo, objMapper.readValue(createAccount(Character.toString((char)i)), AccountResponse.class), 10));
+		}
+		
 		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
-		connectionManager.setMaxTotal(20);
-		connectionManager.setDefaultMaxPerRoute(5);
+		connectionManager.setMaxTotal(100);
+		connectionManager.setDefaultMaxPerRoute(50);
 
 		HttpClient client = HttpClients.custom().setConnectionManager(connectionManager).build();
 
@@ -170,7 +173,7 @@ public class SendMoneyTest {
 		return httpPost;
 	}
 
-	private HttpResponse sendMoney(int fromAccountId, int toAccountId, int amount)
+	private HttpResponse sendMoney(String fromAccountId, String toAccountId, int amount)
 			throws JsonProcessingException, IOException, InterruptedException {
 		SendMoneyRequest req = new SendMoneyRequest(fromAccountId, toAccountId, amount);
 		String requestStr = objMapper.writeValueAsString(req);
@@ -184,7 +187,7 @@ public class SendMoneyTest {
 		return resp;
 	}
 
-	private Account fetchAccountInfo(int accountId) {
+	private Account fetchAccountInfo(String accountId) {
 		Session session = HibernateUtil.getSessionFactory().openSession();
 		Query<Account> query = session.createQuery("from Account where accountNum=:accountNum", Account.class);
 		query.setParameter("accountNum", accountId);
@@ -193,7 +196,7 @@ public class SendMoneyTest {
 		return senderAccInfo;
 	}
 
-	private void addMoney(int accountId, int amt) throws IOException, InterruptedException {
+	private void addMoney(String accountId, int amt) throws IOException, InterruptedException {
 		AddMoneyRequest req = new AddMoneyRequest(accountId, amt);
 		String requestStr = objMapper.writeValueAsString(req);
 

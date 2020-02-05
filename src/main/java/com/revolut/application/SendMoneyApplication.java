@@ -17,5 +17,6 @@ public class SendMoneyApplication extends JaxRsApplication {
 
 	private void initializeLoading() {
 		HibernateUtil.getSessionFactory();
+		ConfigurationLoader.getInstance();
 	}
 }

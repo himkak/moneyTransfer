@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AccountInfo {
 	
-	private int accountNum;
+	private String accountNum;
 	private int balance;
 	private int earmarkedAmt;
 	

@@ -1,5 +1,6 @@
 package com.revolut.repository;
 
+import javax.persistence.OptimisticLockException;
 import javax.persistence.RollbackException;
 
 import org.hibernate.Session;
@@ -44,8 +45,6 @@ public class AccountRepository {
 
 	}
 
-	
-
 	public void saveAccount(Account account) {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
@@ -55,7 +54,7 @@ public class AccountRepository {
 
 	}
 
-	public boolean addMoney(int amt, int accountId) {
+	public boolean addMoney(int amt, String accountId) {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		Query<Account> query = session.createQuery("from Account  where accountNum=:accNum", Account.class);
@@ -75,25 +74,29 @@ public class AccountRepository {
 		return true;
 	}
 
-	public boolean earMarkAccount(int accountId, int amount) {
+	public boolean earMarkAccount(String accountId, int amount) {
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
 		Query<Account> query = session.createQuery("from Account  where accountNum=:accNum", Account.class);
 		query.setParameter("accNum", accountId);
 		Account account = query.setMaxResults(1).uniqueResult();
-		account.setBalance(account.getBalance() - amount);
-		account.setEarmarkedAmt(account.getEarmarkedAmt() + amount);
-		try {
-			transaction.commit();
-		} catch (RollbackException exc) {
-			LOGGER.error("Exception while earmarking amount.", exc);
-			return false;
+		if (account.getBalance() >= amount) {
+			account.setBalance(account.getBalance() - amount);
+			account.setEarmarkedAmt(account.getEarmarkedAmt() + amount);
+			try {
+				transaction.commit();
+			} catch (RollbackException | OptimisticLockException exc) {
+				LOGGER.error("Exception while earmarking amount.", exc);
+				return false;
+			}
+			session.close();
+			return true;
+		}else {
+			throw new RuntimeException("User doesnt have enought balance");
 		}
-		session.close();
-		return true;
 	}
 
-	public boolean reduceEarMarkedAmount(int accountId, int amount) {
+	public boolean reduceEarMarkedAmount(String accountId, int amount) {
 
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
@@ -103,7 +106,7 @@ public class AccountRepository {
 		account.setEarmarkedAmt(account.getEarmarkedAmt() - amount);
 		try {
 			transaction.commit();
-		} catch (RollbackException exc) {
+		} catch (RollbackException | OptimisticLockException exc) {
 			LOGGER.error("Exception while earmarking amount.", exc);
 			return false;
 		}
@@ -112,7 +115,7 @@ public class AccountRepository {
 
 	}
 
-	public boolean rollbackEarmarkedAmount(int accountId, int amount) {
+	public boolean rollbackEarmarkedAmount(String accountId, int amount) {
 
 		Session session = sessionFactory.openSession();
 		Transaction transaction = session.beginTransaction();
@@ -123,7 +126,7 @@ public class AccountRepository {
 		account.setEarmarkedAmt(account.getEarmarkedAmt() - amount);
 		try {
 			transaction.commit();
-		} catch (RollbackException exc) {
+		} catch (RollbackException | OptimisticLockException exc) {
 			LOGGER.error("Exception while earmarking amount.", exc);
 			return false;
 		}
@@ -132,23 +135,23 @@ public class AccountRepository {
 
 	}
 
-	public boolean checkAccountExists(int accountId) {
+	public boolean checkAccountExists(String accountId) {
 		Session session = sessionFactory.openSession();
 		Query<Account> query = session.createQuery("from Account  where accountNum=:accNum", Account.class);
 		query.setParameter("accNum", accountId);
 		Account account = query.setMaxResults(1).uniqueResult();
-		if(account!=null) {
+		if (account != null) {
 			return true;
 		}
 		return false;
 	}
 
-	public boolean isSufficientBalanceExists(int accountId, int amount) {
+	public boolean isSufficientBalanceExists(String accountId, int amount) {
 		Session session = sessionFactory.openSession();
 		Query<Account> query = session.createQuery("from Account  where accountNum=:accNum", Account.class);
 		query.setParameter("accNum", accountId);
 		Account account = query.setMaxResults(1).uniqueResult();
-		if(account.getBalance()<amount) {
+		if (account.getBalance() < amount) {
 			return false;
 		}
 		return true;

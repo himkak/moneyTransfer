@@ -18,8 +18,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TransactionHistory {
 
-	private int fromAccountId;
-	private int toAccountId;
+	private String fromAccountId;
+	private String toAccountId;
 	private int amount;
 	@Id
 	private int transactionId;
@@ -27,7 +27,7 @@ public class TransactionHistory {
 	@OneToMany(cascade=CascadeType.ALL, mappedBy="transaction", fetch=FetchType.LAZY)
 	private Set<TransactionState> transStates;
 
-	public TransactionHistory(int fromAccountId, int toAccountId, int amount, int transactionId) {
+	public TransactionHistory(String fromAccountId, String toAccountId, int amount, int transactionId) {
 		super();
 		this.fromAccountId = fromAccountId;
 		this.toAccountId = toAccountId;
@@ -66,8 +66,8 @@ public class TransactionHistory {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + amount;
-		result = prime * result + fromAccountId;
-		result = prime * result + toAccountId;
+//		result = prime * result + fromAccountId;
+//		result = prime * result + toAccountId;
 		result = prime * result + transactionId;
 		return result;
 	}

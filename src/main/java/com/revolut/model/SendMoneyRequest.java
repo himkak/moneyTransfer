@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SendMoneyRequest {
 
-	private int fromAccountNumber;
-	private int toAccountNumber;
+	private String fromAccountNumber;
+	private String toAccountNumber;
 	private int amount;
 
 }

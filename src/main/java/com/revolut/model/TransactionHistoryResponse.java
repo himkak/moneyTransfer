@@ -7,8 +7,8 @@ import lombok.Data;
 @Data
 @Builder
 public class TransactionHistoryResponse {
-	private int fromAccount;
-	private int toAccount;
+	private String fromAccount;
+	private String toAccount;
 	private int amount;
 	private List<String> states;
 

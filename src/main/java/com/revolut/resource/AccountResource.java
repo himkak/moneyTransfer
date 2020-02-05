@@ -30,7 +30,7 @@ public class AccountResource extends ServerResource {
 	@POST
 	public AccountResponse createAccount(CreateAccountRequest userDetails) {
 		LOGGER.info("Request received to create account");
-		int accNum = accountService.createAccount(userDetails);
+		String accNum = accountService.createAccount(userDetails);
 		LOGGER.debug("Account created " + accNum);
 		return new AccountResponse(accNum);
 	}
@@ -40,6 +40,7 @@ public class AccountResource extends ServerResource {
 	public MoneyTransferResponse sendMoney(SendMoneyRequest request) {
 		LOGGER.debug("Request received to transfer money : {}",request);
 		int txnId= accountService.sendMoney(request);
+		LOGGER.debug("Transaction successfully done.");
 		return new MoneyTransferResponse(txnId);
 	}
 

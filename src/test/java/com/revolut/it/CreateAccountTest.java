@@ -56,7 +56,7 @@ public class CreateAccountTest {
 	private void assertAccountAndUserCount(String userName, HttpResponse resp, int noOfAccounts)
 			throws IOException, JsonParseException, JsonMappingException {
 		AccountResponse accountInfo = objMapper.readValue(EntityUtils.toString(resp.getEntity()), AccountResponse.class);
-		int accountId = accountInfo.getAccountId();
+		String accountId = accountInfo.getAccountId();
 		Session session = HibernateUtil.getSessionFactory().openSession();
 		Query<Account> queryAccount = session.createQuery("from Account where accountNum=:accountNum", Account.class);
 		Query<UserDetails> queryUser = session.createQuery("from UserDetails where userName=:userName",
@@ -74,7 +74,7 @@ public class CreateAccountTest {
 		for (int i = 0; i < responseList.size(); i++) {
 			HttpResponse resp = responseList.get(i);
 			AccountResponse accountInfo = objMapper.readValue(EntityUtils.toString(resp.getEntity()), AccountResponse.class);
-			int accountId = accountInfo.getAccountId();
+			String accountId = accountInfo.getAccountId();
 			Session session = HibernateUtil.getSessionFactory().openSession();
 			Query<Account> queryAccount = session.createQuery("from Account where accountNum=:accountNum",
 					Account.class);
